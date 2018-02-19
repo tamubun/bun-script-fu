@@ -1,0 +1,435 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+<head>
+  <meta content="text/html; charset=Shift_JIS" http-equiv="content-type">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta name="Author" content="tamubun">
+  <link rel="StyleSheet" type="text/css" href="../style.css">
+  <title>cut-frames</title>
+</head>
+
+<body>
+<p style="text-align: right">
+<a href="cut-frames_more.html">cut-frames応用</a>
+</p>
+<h1>Cut Frames</h1>
+<p>
+cut-framesは、<a href="http://www.gimp.org/">Gimp</a>用の拙作スクリプトです。
+<a href="http://www.mplayerhq.hu/">MPlayer</a>を使って作ったファイルか
+ら、このページや<a href="http://bunysmc.exblog.jp/">私のブログ</a>
+にあるような体操の分析写真を作ったりするのが、
+かなり楽になります。Gimp-1, Gimp-2どちらでも使えると思います。
+要望、質問などはブログにお願いします。
+尚、ここの説明は、cut-frames Ver 0.41を対象にしています。
+</p>
+<p>
+Gimpでは、GAPという動画を扱う為のプラグインがありますが、
+用途も使い方もかなり異なります。
+</p>
+<table summary="Contents"
+style="margin-left: auto; margin-right: auto; width: 80%; text-align: left; border-style: groove; border-width: 3;" border="0" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="vertical-align: top;">
+  <ul>
+    <li><a href="#func">できる事</a>
+      <ul>
+        <li><a href="#yoko">横に並ぶ連続写真</a></li>
+        <li><a href="#tate">縦に並ぶ連続写真</a></li>
+	<li><a href="#movie">動画の元</a></li>
+      </ul>
+    </li>
+  </ul>
+</td>
+<td style="vertical-align: top;">
+  <ul>
+    <li><a href="#usage">使い方</a></li>
+    <li><a href="#save">補足: 動画を作る</a></li>
+  </ul>
+</td>
+<td style="vertical-align: top;">
+  <ul>
+    <li><a href="#download">ダウンロードとインストール</a></li>
+    <li><a href="#todo">あとやりたい事</a></li>
+    <li><a href="#updates">更新履歴</a></li>
+  </ul>
+</td>
+</tr>
+</tbody>
+</table>
+
+<h2><a name="func">できる事</a></h2>
+<p>
+cut-framesでは、<a href="../tamuchu.gif">元の動画</a> "movie.mp4"
+(本物の動画ファイルはサイズが大き過ぎるので雰囲気です)から、
+次のような画像を作る事が出来ます。
+</p>
+
+<h3><a name="yoko">1. 横に並ぶ連続写真</a></h3>
+<p>
+横幅を人間を収めるだけの幅に切り詰められます。
+</p>
+<div style="text-align: center;">
+  <img alt="横に並ぶ連続写真" src="../chu2_org.jpg" width="597" height="84">
+</div>
+<p>
+次のように、腰の高さを揃えてしまう事も出来ます。今の例では
+低くなったみたいに見えるだけです。
+</p>
+<div style="text-align: center;">
+  <img alt="腰の高さを揃えた" src="yoko.jpg" width="624" height="73">
+</div>
+
+<h3><a name="tate">2. 縦に並ぶ連続写真</a></h3>
+<p>
+縦幅を人間を収めるだけの幅に切り詰められます。
+宙返りではあまり意味ありませんが。
+</p>
+<div style="text-align: center; margin-left: 40%; width: 100; height: 300; overflow: auto">
+  <img alt="縦に並ぶ連続写真" src="tate.jpg" width="56" height="777">
+</div>
+
+<h3><a name="movie">3. 動画の元</a></h3>
+<p>
+切り出した各フレームを縦や横に並べるのではなく、
+レイヤーにして重ねる事ができます。<a href="kata.gif">この動画</a>は、
+肩を中心にした小さい範囲だけを切り出して、レイヤーに重ねた物を
+GIFアニメーションとして保存した例です。
+</p>
+
+<h2><a name="usage">使い方</a></h2>
+
+<h3><a name="tile">1. フレームをタイルにしたファイルを作る</a></h3>
+
+<p>
+動画を用意し、MPlayerを使って、必要な部分のフレームをタイルにしたファイル
+を作ります。基本的なやり方は、<a href="mplayer.html">MPlayerの使い方</a>
+に書いたので参考にして下さい。以下の説明では、秒間30フレームで録画された、
+サイズ320x240の動画ファイル"movie.mp4"を例にします。
+</p>
+<p><a href="#yoko">横に並ぶ連続写真</a>を
+作る場合は、横一列のタイルにするとやりやすくなります。
+次のコマンドは、"movie.mp4"の2秒目から69フレームを、
+3フレーム飛ばし(全部で23フレームになる)にし、サイズ120x90(
+この値を<a href="#size">フレームのサイズ指定</a>の時利用します)
+に縮小してから、横一列に並べる例です。
+</p>
+<pre class="command">
+mplayer -ss 2 -frames 70 -vo jpeg -vf framestep=3,scale=120:90,tile=23:1::0:0 movie.mp4
+</pre>
+<p>
+ファイルは自動的に"00000001.jpg"と言う名前でカレントディレクトリに
+作られます。
+</p>
+<div style="text-align: center;">
+  <img alt="00000001.jpg" src="tile_yoko.jpg" width="585" height="90">
+</div>
+<p><a href="#tate">縦に並ぶ連続写真</a>を
+作る場合は、横一列のタイルにするとやりやすくなります。
+上のコマンドで、"<code>tile=23:1::0:0</code>"の部分の代わりに
+"<code>tile=1:23::0:0</code>"
+にすれば、各コマが縦に並んだファイルができます。
+</p>
+<div style="text-align: center;">
+  <img alt="00000001.jpg" src="tile_tate.jpg" width="120" height="278">
+</div>
+
+<h3>2. Gimpを起動してそのファイルを開く</h3>
+<p> Gimpの機能を使って、画像の色を調整したりもやってしまって下さい
+(参考: <a href="cut-frames_more.html#level">色を綺麗にする</a>, <a href="cut-frames_more.html#line">線画にする</a>)。
+但し、 画像の拡大縮小をすると、<a href="#size">フレームのサイズ指定</a>の時、
+少しややこしくなります。
+</p>
+
+<h3>3. パス作成ツールを選択</h3>
+<p>
+パス作成ツールは本来、ベジエ曲線を作るツールですが、cut-framesでは、
+まったく違う用途に利用します。
+</p>
+<div style="text-align: center;">
+  <img alt="パス作成ツール" src="path.jpg" width="248" height="170">
+</div>
+
+<h3><a name="dummy">4. 一ヶ所クリック(ダミー)</a></h3>
+<p>
+画像の中のどこでもいいので、一ヶ所クリックします。内部上の都合です。
+<span style="font-weight: bold">忘れてしまいがちですが、これを
+忘れると、切り出しがうまくいかなかったり、エラーになったりします。
+</span>
+</p>
+<div style="text-align: center;">
+  <img alt="ダミー" src="dummy.jpg" width="585" height="125">
+</div>
+
+<h3><a name="first">5. 切り出しの最初のフレームを指定</a></h3>
+<p style="font-size: smaller">
+(ここでは標準的なの指定方法を説明します。簡易指定方法、スムージング時のキー
+になるフレームの指定方法については、
+<a href="cut-frames_more.html#path">cut-frames応用: パスの指定補足</a>
+を参照して下さい)
+</p>
+<p>
+上の一ヶ所クリックに続けて、最初に切り出したいフレームの中の一点を
+クリックしたまま、少しドラッグすると次のようになります。
+描かれる曲線は、無視して下さい。
+(分かりやすいように、画像の色は薄くしてあります。)
+</p>
+<div style="text-align: center;">
+  <img alt="出だし" src="start.jpg" width="583" height="87">
+</div>
+<p>
+クリックした所にある○を端点、ドラッグして表れる二つの□をコントロール
+と言います。(二つのコントロールの位置は、個別に移動させる事ができます。)
+cut-framesでは、下の絵の様に二つのコントロールの位置によって決まる長方形
+を使って、切り出すフレームの大きさを指定します。一方、端点の方は、フレームを
+並べる時の基準点を指定します。
+</p>
+<div style="text-align: center;">
+  <img alt="端点とコントロール" src="rect.jpg" width="307" height="156">
+</div>
+
+<h3><a name="nokori">6. 残りのフレームの切り出し範囲を指定していく</a></h3>
+<p>
+以下、同様にして、残りのフレームに対して、端点とコントロールの位置を使って、
+切り出す範囲を指定していきます
+(参考: <a href="cut-frames_more.html#align">指定する端点の高さを一定にする</a>)。
+但し、残りのフレームに関しては、
+cut-framesを使う時に指定するフレームの並べ方によって次の違いがあります。
+</p>
+<dl>
+  <dt>横に並べる場合</dt>
+  <dd>指定した幅と基準点の縦の位置だけ
+が使われ、縦幅は最初のフレームの値に揃えられる。</dd>
+  <dt>縦に並べる場合</dt>
+  <dd>指定した高さと基準点の横の位置
+だけが使われ、横幅は最初のフレームの値に揃えられる。</dd>
+  <dt><a name="layerpath">レイヤーにして重ねる場合</a></dt>
+  <dd>基準点の縦横の位置だけ
+が使われ、フレームの大きさは最初のフレームの大きさに揃えられる。
+つまり、この場合には、コントロールの位置の情報は使われないので、
+重ねる基準になる端点だけを順にクリックしていくだけでよい。
+</dd>
+</dl>
+<p>
+尚、いずれの場合も、切り出す部分がフレームの外にはみ出てしまう時には、
+そこは透明になります。
+</p>
+<table summary="yoko"
+style="margin-left: auto; margin-right: auto; width: 80%; text-align: left;"
+border="0" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="text-align: right; vertical-align: top;">
+  <img alt="残りのフレーム" src="next.jpg" width="586" height="133" style="margin-right: 40px">
+</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right;">
+  <img alt="横に並べるとき" src="leftright.jpg" width="441" height="243" style="margin-top: 1em;">
+</td>
+</tr>
+</tbody>
+</table>
+
+<h3>7. cut-framesを使って切り出しを行う</h3>
+<p>
+画像を右クリックして現れるメニュー
+の中から、
+<span style="font-weight: bold">Script-Fu</span> →
+<span style="font-weight: bold">Gymnp</span> →
+<span style="font-weight: bold">cut-frames</span>
+を選択して現れるダイアログで幾つか指定を行って切り出しを行います。
+</p>
+<div style="text-align: center;">
+  <img alt="dialog" src="dialog.jpg" width="415" height="261">
+</div>
+<dl>
+<dt><a name="size">Frame Width, Frame Height</a></dt>
+<dd>
+元の動画の1フレームの
+幅と高さを入れます。例えば、MPlayerのタイル出力時、ビデオフィルタで
+<code>scale=120:90</code>と指定した場合には、
+Frame Width = 120, Frame Height = 90にします。この値が狂っていると、
+正しい切り出しができないので注意して下さい。
+</dd>
+
+<dt>方向 (Orientationと表示されるかも)</dt>
+<dd>切り出したフレームを並べる方向を指定します。
+  <ul>
+  <li>"<span style="font-weight: bold">Left to Right</span>": 横に並べます。
+<a href="#yoko">横に並ぶ連続写真の例</a></li>
+  <li>"<span style="font-weight: bold">Up to Down</span>": 縦に並べます。
+<a href="#tate">縦に並ぶ連続写真の例</a></li>
+  <li>"<span style="font-weight: bold"><a name="layer">Layer</a></span>":
+全部同じ大きさのレイヤーにして、上に重ねます。これを動画の元に
+して、アニメーションGIF等を作れます
+(<a href="#save">補足: 動画を作る</a>)。
+<a href="#movie">アニメーションGIFの例</a></li>
+  </ul>
+</dd>
+
+<dt><a name="smoothing">Path Smoothing</a> (方向で"Layer"
+を指定したときだけ有効になります)</dt>
+<dd>パス作成ツールで指定した位置を補正するためのオプションです。<br>
+パス作成ツール指定時のクリック位置の微妙な「ずれ」のために、
+そのまま切り出しを行うと、動画にした時、もの凄く細かく
+画面がぶれてしまいます。このオプションを大きな値にする程、
+切り出しする位置を補正して、滑らかに各位置をつなごうと試みます
+(0にすると、完全に指定したままの位置で切り出しを行います。)<br>
+切り出しが思った通り行かない時には、この値を色々変えてやり直してみて下さい。
+</dd>
+</dl>
+
+<h2><a name="save">補足: 動画を作る</a></h2>
+<p>
+cut-framesを使って、切り出しを行う際、方向を
+<a href="#layer">layer</a>に指定すると、切り出された各フレームはレイヤーに
+なって、一番最初のフレームの上に順に重ねられます。この画像は動画を作る
+元になります。取り敢えずは、
+画像を右クリックして、<span style="font-weight: bold">フィルタ</span> →
+<span style="font-weight: bold">アニメーション</span> →
+<span style="font-weight: bold">動画再生</span>
+を選んで現れるウィンドウ内で、<span style="font-weight: bold">再生/停止</span>ボタンを押すと、
+動かしてみる事が出来ます。
+</p>
+<p>
+この画像を動画に保存するには、次の三つの方法があります。
+</p>
+<ol>
+<li>アニメーションGIFとして保存する</li>
+<li>各フレームを別々に保存し、MEncoderを利用する</li>
+<li>Gimpのプラグイン GAPを利用する</li>
+</ol>
+<p>
+3.のGAPを利用する方法は、私が分かっていないので、割愛します。
+</p>
+
+<h3>1. アニメーションGIF</h3>
+<p>
+Gimpで、ファイルを保存するときに、".gif"と拡張子を付けると現れるダイアログ
+で、<span style="font-weight: bold">アニメーションとして保存</span>を選び、
+<span style="font-weight: bold">エクスポート</span>ボタンを押して下さい。
+又、ダイアログが現れるので、そこで、秒間何フレームで再生させるか等を
+指定して下さい。
+</p>
+
+<h3>2. MEncoderを利用</h3>
+<p>
+MEncoderを使って動画を作るためには、まず、各フレームを連番のファイルに保存す
+る必要があります。これには、いっちーさん作のGimpスクリプト
+<a href="http://www004.upp.so-net.ne.jp/iccii/files/script/continuous-save.html">Continuous Save</a>を、私が少し変更した、
+<a href="continuous-save.html">たむぶん版Continuous Save</a>を利用します。
+これをインストールしてあれば、以下で連番のファイルが作れます。
+</p>
+<ol>
+  <li>画像を右クリックして、
+メニューから <span style="font-weight: bold">Script-Fu</span> →
+<span style="font-weight: bold">Utils</span> →
+<span style="font-weight: bold">Continuous Save</span>
+を選ぶ</li>
+  <li>JPEG, PNGのどちらかの保存形式を指定する</li>
+  <li>保存する位置、ファイル名の最初に付ける名前を指定する
+(その他のオプションは最初のままで良い)</li>
+  <li><span style="font-weight: bold">OK</span>を押す</li>
+</ol>
+<p>
+例えば、2.でJPEGを指定し、3.は最初の"MyPicture_"のままにした場合には、
+カレントディレクトリに、"MyPicture_00000001.jpg", "MyPicture_00000002.jpg", ...
+と言うファイルが作られます。
+</p>
+<p>
+最後に、MPlayerに付属のMEncoderを用いて
+<a href="mplayer.html#encode">ファイルから動画を作る</a>事が出来ます。今の、
+"MyPicture_"の例では、
+</p>
+<pre class="command">
+mencoder "mf://MyPicture_*.jpg" -mf type=jpg:fps=30 -o output.avi -ovc lavc -lavcopts vcodec=mpeg4
+</pre>
+<p>
+とすれば、秒間30フレームの早さで再生される音の無い動画 "output.avi"ができ上がります。
+</p>
+
+<h2><a name="download">ダウンロードとインストール</a></h2>
+<p>
+<a href="gimp/cut-frames.scm">cut-frames.scm(Gimp 2.4以降用)</a>を保存して、Gimp 2.8の場合なら、
+</p>
+<ul>
+<li>Unix系のOSの場合は "~/.gimp-2.8/scripts"</li>
+<li>Windowsの場合は "C:\Program Files\GIMP2\scripts"</li>
+</ul>
+<p>
+にコピーして下さい。
+</p>
+
+<h2><a name="todo">あとやりたい事</a></h2>
+<ul>
+<li>スキーやスノーボードの滑りを下から写した連続写真の様に、縦一列に
+整列するのでなく、ずらして並べた方が綺麗に見えるやつに対応したい。
+でもどうやって指定するか。
+例:(
+<a href="http://www.spacelan.ne.jp/~hirama-01/Telmark/telmarkindex.htm">テレマークターンの歩み</a>。
+Googleのイメージ検索で見つけた。)
+</li>
+<li>端点が画像の外にあるときに、切り出しがおかしくなるバグの修正。当面、気にしない</li>
+</ul>
+
+<h2><a name="updates">更新履歴</a></h2>
+<dl>
+<dt>Ver 0.41 (2009.5.31)</dt>
+<dd>
+- バグ修正。Ver 0.34でできたことはできるようになったはず。
+</dd>
+<dt>Ver 0.4 (2009.5.27)</dt>
+<dd>
+- Gimp 2.4以降用に修正<br>
+- まだ、バグだらけだが、取り敢えず
+</dd>
+<dt>Ver 0.34 (2005.3.31)</dt>
+<dd>
+- 少し要らないところを捨てて綺麗にした<br>
+- 端点が画像の外にあるときに、少し対応した(めんどくさくなって途中で止めた)
+</dd>
+<dt>Ver 0.33 (2005.3.29)</dt>
+<dd>
+- Smoothingのキーフレームのバグ(プラスマイナスの間違い)を修正
+</dd>
+<dt>Ver 0.32 (2005.3.26)</dt>
+<dd>
+- デバッグ用のprint命令を削除
+</dd>
+<dt>Ver 0.31 (2005.3.25)</dt>
+<dd>
+- パスの簡易指定のバグを修正
+</dd>
+<dt>Ver 0.3 (2005.3.24)</dt>
+<dd>
+- パスの簡易指定を出来るようにした<br>
+- Smoothingで補正したパスはやはり残さないように戻した<br>
+- 全体的なプログラムの整理
+</dd>
+<dt>Ver 0.2 (2005.3.15)</dt>
+<dd>
+- Path Smoothingは、Layerで切り出すときだけ有効になるようにした<br>
+- Layerで切り出す時に、Smoothingのヒントになるフレームを指定できるようにした<br>
+- Smoothingで止まらなくなる事があるバグを修正した(今度は大丈夫と思う)<br>
+- Smoothingで補正したパスも残すようにした(バグあるくさい)<br>
+- Smoothingの最大値を4から5に変更した
+</dd>
+<dt>Ver 0.11 (2005.3.11)</dt>
+<dd>
+- 連絡先をブログにした
+</dd>
+<dt>Ver 0.1 (2005.3.9)</dt>
+<dd>
+- 公開
+</dd>
+</dl>
+
+<hr style="width: 100%; height: 3px;">
+<p style="text-align: center;">
+<a href="../index.html">ホームへ</a>
+<a href="http://bunysmc.exblog.jp/">ブログへ</a>
+</p>
+
+</body>
+</html>

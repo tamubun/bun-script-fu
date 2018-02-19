@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+<head>
+  <meta content="text/html; charset=Shift_JIS" http-equiv="content-type">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta name="Author" content="tamubun">
+  <link rel="StyleSheet" type="text/css" href="../style.css">
+  <title>cut-frames</title>
+</head>
+
+<body>
+<p style="text-align: right">
+<a href="cut-frames.html">cut-frames</a>
+</p>
+<h1>Cut Frames応用</h1>
+<p>
+ここでは、cut-framesとGimpの機能を組み合わせて使う幾つかの方法を紹介します。
+</p>
+<table summary="Contents"
+style="margin-left: auto; margin-right: auto; width: 80%; text-align: left; border-style: groove; border-width: 3;" border="0" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td width="50%" style="vertical-align: top;">
+  <ul>
+    <li><a href="#level">写真の加工1: 色を綺麗にする</a></li>
+    <li><a href="#line">写真の加工2: 線画にする</a></li>
+    <li><a href="#align">指定する端点の高さを一定にする</a></li>
+    <li><a href="#compare">比較画像を作る</a></li>
+  </ul>
+</td>
+<td width="50%" style="vertical-align: top;">
+  <ul>
+    <li><a href="#path">パスの指定補足</a>
+    <ul>
+      <li><a href="#simple">パスの簡易指定</a></li>
+      <li><a href="#key">キーフレームの指定</a></li>
+    </ul>
+    </li>
+  </ul>
+</td>
+</tr>
+</tbody>
+</table>
+
+<h2><a name="level">写真の加工1: 色を綺麗にする</a></h2>
+<p>
+タイルの画像を右クリックして現れるメニューから、
+<span style="font-weight: bold">レイヤー</span> → 
+<span style="font-weight: bold">色</span> → 
+<span style="font-weight: bold">レベル</span>
+を選択し、「自動」ボタンを押してOKする<br>
+(Gimp-1では、"<span style="font-weight: bold">レイヤー</span> →"
+ではなく、"<span style="font-weight: bold">画像</span> →")
+</p>
+
+<h2><a name="line">写真の加工2: 線画にする</a></h2>
+<p>
+ここに書いているやり方は、結構試行錯誤が要ります。
+背景や服の色の関係でうまくいかない時もあります。
+</p>
+<ol>
+<li>右クリックメニューから、<span style="font-weight: bold">レイヤー</span> → 
+<span style="font-weight: bold">レイヤーを複製</span></li>
+<li><span style="font-weight: bold">ダイアログ</span> → 
+<span style="font-weight: bold">レイヤー</span>を使って、レイヤー
+ダイアログを開く</li>
+<li>そのダイアログで、"背景 コピー"レイヤーが選ばれていることを確認して、
+モードを"除算"にする</li>
+<li>元のタイル画像の右クリック
+メニューから、<span style="font-weight: bold">フィルタ</span> → 
+<span style="font-weight: bold">ぼかし</span> → 
+<span style="font-weight: bold">ガウシアンぼかし(IIR)</span>
+を選んで実行。指定するパラメータは色々変えてみる。(メニュー"ガウシアン
+ぼかし(IIR)"は、"Gaussian Blur(IIR)"かも)</li>
+<li>同じく元のタイル画像の右クリック
+メニューから、<span style="font-weight: bold">フィルタ</span> → 
+<span style="font-weight: bold">輪郭抽出</span> → 
+<span style="font-weight: bold">輪郭</span>
+を選んで実行。指定するパラメータは色々変えてみる。(メニュー"輪郭"
+は、"Edge"かも)</li>
+<li>レイヤーダイアログで"背景レイヤー"をクリック</li>
+<li>元のタイル画像の右クリック
+メニューから、<span style="font-weight: bold">フィルタ</span> → 
+<span style="font-weight: bold">強調</span> → 
+<span style="font-weight: bold">明瞭化</span>
+を選んで実行。指定するパラメータは60とか大きめに。(メニュー"明瞭化"は、
+"Sharpen"かも)</li>
+<li>レイヤーダイアログの"背景"を右クリックして現れるメニューから、
+<span style="font-weight: bold">画像の結合</span></li>
+<li>元のタイル画像の右クリックメニューから、<span style="font-weight: bold">レイヤー</span> → 
+<span style="font-weight: bold">色</span>  → 
+<span style="font-weight: bold">脱色</span></li>
+</ol>
+
+<h2><a name="align">指定する端点の高さを一定にする</a></h2>
+<p>
+パス選択ツールを使って、
+<a href="cut-frames.html#nokori">切り出し範囲を指定</a>していく時、
+端点の高さは一定にしたい時には、Gimpのガイドを利用して下さい。
+マウスカーソルがガイドの近くに来ると、ガイドの上に引きつけられます。
+</p>
+<div style="text-align: center;">
+  <img alt="dialog" src="guide.jpg" width="641" height="348">
+</div>
+
+<h2><a name="compare">比較画像を作る</a></h2>
+<p>
+比較画像の元になる二つのタイル画像を、それぞれ画像1, 画像2とします。
+どちらも、1フレームの大きさは同じとします。
+</p>
+<ol>
+<li>画像1の右クリックメニューで、<span style="font-weight: bold">画像</span> → 
+<span style="font-weight: bold">キャンバスサイズ</span> 
+を選び、画像2が入るだけの大きさに広げる</li>
+<li>画像2の右クリックメニューで、<span style="font-weight: bold">編集</span> → 
+<span style="font-weight: bold">コピー</span> を選ぶ</li>
+<li>画像1の右クリックメニューで、<span style="font-weight: bold">編集</span> → 
+<span style="font-weight: bold">貼り付け</span> を選ぶ。
+以下全部、画像1の右クリックメニューで。</li>
+<li><span style="font-weight: bold">レイヤー</span> → 
+<span style="font-weight: bold">新規レイヤー</span> を選ぶ</li>
+<li><span style="font-weight: bold">道具</span> → 
+<span style="font-weight: bold">変換ツール</span> → 
+<span style="font-weight: bold">移動</span> を使い、新しく張り付けた
+レイヤーの位置を調整して、並べたいフレームの位置を揃える</li>
+<li><span style="font-weight: bold">レイヤー</span> → 
+<span style="font-weight: bold">下のレイヤーと結合</span> を選ぶ</li>
+</ol>
+<p>
+以上で、全体が一枚のレイヤーになるので、あとは、普通に
+パス作成ツールを使って、切り出しの範囲を指定して、最後にcut-framesを使って
+切り出しを行います。横に並べた画像を上げに並べて比較写真を作る場合、
+cut-framesのダイアログで、"Frame Width"の方は、フレームの横幅(共通)、
+"Frame Height"の方は、両方の画像が入るのに十分な値を指定して下さい。
+</p>
+
+<h2><a name="path">パスの指定補足</a></h2>
+<p>ここでは、<a href="cut-frames.html#usage">使い方</a>では説明を省略した、
+その他の指定方法について説明します。尚、パスを指定する時
+、<a href="cut-frames.html#dummy"><span style="font-weight: bold">最初
+に一ヶ所ダミーでクリックする</span></a>のは、どの方法でも同じです。
+</p>
+<h3><a name="simple">パスの簡易指定</a></h3>
+<p>
+下の1,2の簡易指定の方法は組み合わせることもできます。
+</p>
+<dl>
+<dt>1. フレーム全体を切り出す</dt>
+<dd>パス作成ツールを使って、<a href="cut-frames.html#first">切り出しの
+最初のフレームを指定</a>する時に、クリックするだけ(ドラッグを行わない)で、
+切り出しの大きさを決める長方形を指定しなければ、指定した全てのフレームが、
+元々のフレームの大きさのまま切り出されます。
+</dd>
+</dl>
+<div style="text-align: center;">
+  <img alt="フレーム全体を切り出す" src="simple1.jpg" width="774" height="332">
+</div>
+<dl>
+<dt>2. 最初と最後だけ指定して、その間のフレームを全て切り出す</dt>
+<dd>パス作成ツールを使って、<a href="cut-frames.html#first">切り出しの
+最初のフレームを指定</a>した後、<a href="cut-frames.html#nokori">残りの
+フレームの切り出し範囲を一つ一つ指定していく</a>代わりに、終りの
+フレームを一つだけ選び、その中のどこか一点をクリックすれば、
+最初のフレームから、選んだフレームまでの
+全てのフレームを、最初のフレームで指定したのと同じ範囲で切り出します。
+</dd>
+</dl>
+<div style="text-align: center;">
+  <img alt="間のフレームを全て切り出す" src="simple2.jpg" width="746" height="305">
+</div>
+
+<h3><a name="key">キーフレームの指定</a></h3>
+<p>動画を作るために、切り出したフレームをレイヤーにして重ねる
+場合、<a href="cut-frames.html#smoothing">Path Smoothing</a>オプションの
+値を1以上にして切り出しを行うと、パス作成ツールを使って指定した位置の補正
+が行われます。この結果、動画の「ぶれ」は少なくなりますが、動きの激しい
+場面では、逆に、補正が効き過ぎてしまい、例えば、人が写っている所だけ
+切り出そうとしているのに、切り出したフレームに人が入っていない
+といった事があります。</p>
+<p>
+これを避けるために、キーフレーム(そのフレームに関しては、指定した
+ままの位置で切り出しを行う)をcut-framesに伝える事ができます。(最初の
+フレームと最後のフレームは、いつでもキーフレームになります)</p>
+<p>
+キーフレームを指定するには、パス作成ツールを使っ
+て、<a href="cut-frames.html#first">切り出しの最初のフレーム
+を指定</a>した後、<a href="cut-frames.html#nokori">残りの
+フレームを指定していく</a>(レイヤーにして重ねる時には、普通は
+端点を指定するだけでよい)時に、ドラッグを行って、コントロールを引っ張り
+出します。<span style="font-size: small">(少し手がぶれて小さなドラッグ
+をしてしまう事はよくあるので、ドラッグ範囲が小さい時には、
+キーフレームとは認識しないようにしてあります。)</span></p>
+<div style="text-align: center;">
+  <img alt="キーフレームの指定" src="key.jpg" width="532" height="300">
+</div>
+<p>キーフレームの端点の周囲だけは、ベジエ曲線が曲がっているので、
+一目で分かります。
+</p>
+
+<hr style="width: 100%; height: 3px;">
+<p style="text-align: center;">
+<a href="../index.html">ホームへ</a>
+<a href="http://bunysmc.exblog.jp/">ブログへ</a>
+</p>
+
+</body>
+</html>

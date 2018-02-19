@@ -1,0 +1,55 @@
+body {
+	background-color: #f0fff0;
+}
+
+h1 {
+	padding: 0.1em;
+}
+
+h2 {
+	border-color: #408040; border-style: solid;
+	border-top-width: 0em;
+	border-right-width: 0em;
+	border-bottom-width: 0em;
+	border-left-width: 0.5em;
+	padding: 0.3em;
+}
+
+h3 {
+	border: 1px solid #ffdfdf;
+	background-color: #ffefef;
+	padding: 0.3em;
+	border-style: solid;
+	margin-bottom: 1em;
+}
+
+dl {
+	margin-left: 2em;
+}
+
+dt {
+	font-weight: bold;
+	margin-top: 0.5em;
+}
+
+pre.command {
+	margin-left: 2em;
+	margin-right: 2em;
+	padding: 0.3em 1em;
+	border-style: inset;
+	color: white;
+	background-color: black;
+	overflow: auto;
+}
+
+pre.program {
+	margin-left: 2em;
+	margin-right: 2em;
+	height:15em;
+	padding: 0.3em 1em;
+	border-style: inset;
+	color: black;
+	background-color: white;
+	overflow: auto;
+	font-family: courier,monospace;
+}

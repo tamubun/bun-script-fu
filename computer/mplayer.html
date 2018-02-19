@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+<head>
+  <meta content="text/html; charset=Shift_JIS" http-equiv="content-type">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta name="Author" content="tamubun">
+  <link rel="StyleSheet" type="text/css" href="../style.css">
+  <title>MPlayer</title>
+</head>
+
+<body>
+<h1>MPlayer</h1>
+<p>
+<a href="http://www.mplayerhq.hu/">MPlayer</a>は、非常に機能の豊富なフリーの動画プレーヤーです。
+但し、GUIを使って行える操作は、かなり制限されており、凝った操作は、全てコマンドライン(WindowsならDOSプロンプト)から行う必要があります。
+</p>
+<p>
+ここでは、インストールの方法や、詳細な説明は省略し、<a href="cut-frames.html">cut-frames</a>を使う時に必要なコマンドを中心に、いくつかの使い方を紹介します。
+尚、ここの説明は、MPlayer 1.0を対象にしています。
+</p>
+<table summary="Contents"
+style="margin-left: auto; margin-right: auto; width: 80%; text-align: left; border-style: groove; border-width: 3;" border="0" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+  <td><ul><li><a href="#simple">単純な再生</a></li></ul></td>
+  <td><ul><li><a href="#vo">各フレームをファイルに出力</a></li></ul></td>
+  <td><ul><li><a href="#encode">ファイルから動画を作る</a></li></ul></td>
+</tr>
+<tr>
+  <td><ul><li><a href="#speed">再生する範囲を指定</a></li></ul></td>
+  <td><ul><li><a href="#framestep">飛ばし飛ばしにファイル出力</a></li></ul></td>
+  <td></td>
+</tr>
+<tr>
+  <td><ul><li><a href="#speed">スロー再生</a></li></ul></td>
+  <td><ul><li><a href="#tile">タイルにしてファイル出力</a></li></ul></td>
+  <td></td>
+</tr>
+<tr>
+  <td><ul><li><a href="#mirror">左右反転</a></li></ul></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td><ul><li><a href="#scale">サイズ変更</a></li></ul></td>
+  <td><ul><li><a href="#vf">ビデオフィルタの組み合わせ</a></li></ul></td>
+  <td></td>
+</tr>
+</tbody>
+</table>
+
+<h2>動画の再生</h2>
+
+<p>
+MPlayerは、QuickTimeや、AVI等、大抵の動画フォーマットを再生する事ができます。
+私は、普段はSanyoのXactiで録画した".mp4"形式の動画をよく使っています。
+</p>
+<h3><a name="simple">単純な再生</a></h3>
+<p>
+動画ファイル"movie.mp4"を再生するには、コマンドラインから、
+</p>
+<pre class="command">mplayer movie.mp4</pre>
+<p>
+と入力してやります。
+標準設定では、再生中に"f"キーを押す度に、ウィンドウ表示と全画面表示が切り替わり、"q"キーを押すと再生が終了します。
+又、スペースキーを押すと、一時停止し、もう一度押すと再開されます。
+一時停止と再生を繰り返していると、コマンドラインに、
+</p>
+<pre class="command">
+A:   <span style="color: red">1.2 V</span>:   1.2 A-V: -0.000 ct:  0.025  <span style="color:red">38/ 38</span> 66%  5% 31.5% 9 0
+</pre>
+<p>
+のような表示が並びます。"1.2 V"の部分が、何秒目で停止したか、"38/38"の部分が、何フレーム目で停止したかを表しています。
+必要な部分をスローで繰り返し再生する時や、cut-framesで動画の切り出しをする時等には、ここの数字が参考になります。
+</p>
+<h3><a name="speed">再生する範囲を指定、スロー再生</a></h3>
+<p>
+動画ファイル"movie.mp4"を、1.2秒目から、50フレーム、1/10のスピードでスロー再生するには、次のコマンドを入力します。
+</p>
+<pre class="command">
+mplayer -ss 1.2 -frames 50 -speed 0.1 movie.mp4
+</pre>
+<p>
+(開始時間ではなく、開始フレームを指定するやり方は分かりません。
+多分出来ないのだと思います。
+尚、上のようにして終了するフレームを指定する方法は、下記の<a href="#tile">タイルにしてファイル出力</a>する方法と組み合わせた時にうまく働かなくなったようです。)
+</p>
+<p>
+動画ファイル"movie.mp4"を、1時間10分5秒目から、0.3秒の間だけ再生するには、次のコマンドを入力します。
+</p>
+<pre class="command">
+mplayer -ss 01:10:05 -endpos 0.3 movie.mp4
+</pre>
+<h3><a name="mirror">左右反転</a></h3>
+<p>
+右から走ってくる人と左から走ってくる人の動画を比較したい場合や、鞍馬の時計回り、反時計回りの旋回の人の動画とを比較したい場合等、動画の左右を反転したい場合がよくあります。
+これを行うには、ビデオフィルタと言う機能を利用します。
+</p>
+<pre class="command">
+mplayer -vf mirror movie.mp4
+</pre>
+<p>
+上のように、ビデオフィルタは、"<code>-vf</code>"を使って指定します。
+</p>
+<h3><a name="scale">サイズ変更</a></h3>
+<p>
+動画のサイズを拡大、縮小するのにもビデオフィルタを利用します。
+元の画像サイズが320x240の時に、これを縦横半分の長さに縮小するには、
+</p>
+<pre class="command">
+mplayer -vf scale=160:120 movie.mp4
+</pre>
+<p>
+と指定します。
+左右反転して、さらに、サイズも縮小したい場合には、<a href="#vf">ビデオフィルタの組み合わせ</a>を行います。
+</p>
+
+<h2>動画のフレームをファイルに出力させる</h2>
+
+<h3><a name="vo">各フレームをファイルに出力</a></h3>
+<p>
+動画ファイルの各フレームを、JPEGファイルやPNGファイルに出力する事が出来ます。
+例えば、次のコマンドを入力すると、"movie.mp4"の1.2秒目から、50フレームが全てJPEGファイルになって、カレントディレクトリに、"00000001.jpg", "00000002.jpg"
+, ..., "00000050.jpg"と大量に出力されます。
+このように、全部のフレームをファイルにして出力するのは、再び、そこから動画を作る時等に有効です。
+</p>
+<pre class="command">
+mplayer -ss 1.2 -frames 51 -vo jpeg movie.mp4
+</pre>
+<p>
+(コマンドには何故か、一枚余分にフレームを指定しないといけないようです。)
+"<code>-vo jpeg</code>"の部分を"<code>-vo png</code>"
+にすると、PNGファイルが同様に出力されます。尚、ファイルが出力されるとき、元に同じ名前のファイルがあっても、そのまま上書きされてしまいます。
+</p>
+<h3><a name="framestep">飛ばし飛ばしにファイル出力</a></h3>
+<p>
+体操の技の連続写真を作る場合等は、秒間10フレームぐらいが適当です。
+元の動画が秒間30フレームで録画されている時には、3フレーム飛ばしにすれば、丁度秒間10フレームになります。
+これを行うには、ビデオフィルタを利用して、次のように入力します。
+</p>
+<pre class="command">
+mplayer -ss 1.2 -frames 51 -vo jpeg -vf framestep=3step movie.mp4
+</pre>
+<p>
+50フレームが3フレーム飛ばしに出力されるので、全部で16枚のファイル"00000001.jpg", "00000002.jpg", ..., "00000016.jpg"がカレントディレクトリに作られます。
+</p>
+<h3><a name="tile">タイルにしてファイル出力</a></h3>
+<p>
+<img alt="タイル" src="00000001.jpg" width="300" height="135" align="right">
+動画の各フレームを、一枚づつ別のファイルにするのではなく、右のような感じで、まとめてタイル状に敷き詰めたファイルを作る事も出来ます。
+</p>
+<p>
+これを行うのにも、ビデオフィルタを利用します。次の例では、動画"movie.mp4"の1.2秒目から2秒間の間のフレームを、横5枚縦3枚のタイルに敷き詰めます。
+一枚のタイルに収まらない場合は、"00000001.jpg","00000002.jpg",...というファイルがカレントディレクトリに作られます。
+</p>
+<pre class="command">
+mplayer -ss 1.2 -endpos 2 -vo jpeg -vf tile=5:3::0:0 movie.mp4
+</pre>
+<p>
+"<code>::0:0</code>"の部分は各フレーム間に隙間を付けるか等のオプションです。
+尚、出力時に余ったフレームは切捨てられる事に注意して下さい。
+例えば、タイルの数を多めに指定して、
+</p>
+<pre class="command">
+<span style="color: yellow;">ダメな例</span>
+mplayer -ss 1.2 -endpos 2 -vo jpeg -vf tile=<span style="color:red">10:10</span>::0:0 movie.mp4
+</pre>
+<p>
+と指定すると、全部のフレームが余ったフレームと見なされて切捨てられるため、一枚もファイルが作られません。
+</p>
+<p>
+ここに書いたタイル機能だけでも、取り敢えず、体操の技等の連続写真は作れますが、<a href="cut-frames.html">cut-frames</a>を使うと、このタイル出力から必要な部分だけを簡単に(?)切り出して、見栄え良くする事が出来ます。
+</p>
+<h2><a name="vf">ビデオフィルタの組み合わせ</a></h2>
+
+<p>
+複数のビデオフィルタを利用する時には、カンマでくぎって指定を行います。
+例えば、動画を再生する時に、左右反転と縮小を行いたいなら、
+</p>
+<pre class="command">
+mplayer -vf framestep=mirror,scale=160:120 movie.mp4
+</pre>
+<p>
+という風に指定する事になります。複雑な例で、2秒間のフレームを3フレーム飛ばしにしてJPEGファイルに出力する時、縮小も行い、更に、横一列にタイル化も行うには、
+</p>
+<pre class="command">
+mplayer -ss 1.2 -endpos 2 -vo jpeg -vf framestep=3step,scale=160:120,tile=16:1::0:0 movie.mp4
+</pre>
+<p>
+という風に指定します。ビデオフィルタは、左側に書いた物から順に適用されます。
+もし、上のコマンドの代わりに間違えて、
+</p>
+<pre class="command">
+<span style="color: yellow;">ダメな例</span>
+mplayer -ss 1.2 -endpos 2 -vo jpeg -vf framestep=3step,<span style="color: red;">tile=16:1::0:0,scale=160:120</span> movie.mp4
+</pre>
+<p>
+と入れると、タイル化した後に、全体が160x120のサイズに縮小されるので、一コマがとても小さなファイルが出来てしまいます。
+</p>
+<h2><a name="encode">ファイルから動画を作る</a></h2>
+<p>
+(以下の内容は、Mplayer ver 1.0では確認してないので、古くなってるかも知れません。)
+</p>
+<p>
+カレントディレクトリにある"00000001.jpg", "00000002.jpg", ...という名前の全てのJPEGファイルから、動画を作るには、MEncoderを使い、
+</p>
+<pre class="command">
+mencoder "mf://*.jpg" -mf type=jpg:fps=30 -o output.avi -ovc lavc -lavcopts vcodec=wmv1
+</pre>
+<p>
+と入力します。
+これで、"output.avi"と言うファイル名で音の無い動画がカレントディレクトリに作られます。"<code>fps=30</code>"の部分で秒間何コマで再生するかを指定しています。
+これを小さい値にするとスローモーションの動画が作られます。
+"<code>vcodec=wmv1</code>"の部分で、wmv1, wmv2, mpeg4, msmpeg4等のコーデックを指定します。
+</p>
+<p>
+<a href="#vo">各フレームをファイルに出力</a>と、この方法とを組み合わせると、動画のフォーマットやコーデックの変換が行えます。
+但し、mp4フォーマット(拡張子".mp4")や、QuickTimeフォーマット(拡張子".mov")のファイルは作れないようです。
+</p>
+<p>MEncoderではなく、<a href="http://ffmpeg.sourceforge.net/">FFMpeg</a>というソフト(Windows版の実行プログラムは、<a href="http://www.nurs.or.jp/~calcium/3gpp/index.html">携帯動画変換君 3GP_Converter</a>の"cores"ディレクトリに入っている)を使うと、mp4フォーマットを含む各種のフォーマットの動画も、連番の画像ファイルから作りだす事ができます。
+例えば、各フレームに8桁の連番が振られているJPEG画像から、mp4の動画"out.mp4"を作るには、
+</p>
+<pre class="command">
+ffmpeg -i %0d.jpg out.mp4
+</pre>
+<p>
+とやります(各種オプションについては省略)。
+ただ、FFMpegを使っても、SanyoのXactiで再生できるmp4の動画はうまく作れませんでした。
+色々試行錯誤しては見たのですが。やり方分かる方いらっしゃれば教えて下さい。
+</p>
+<p>
+<span style="font-size: smaller; ">MPEG-4や、MS-MPEG4と言うのはコーデック(画像の圧縮形式)で、mp4と言うのは、ファイルフォーマット(中に色々なコーデックの画像や音を入れられる)です。又、MS-MPEG4とMPEG-4コーデックとは無関係だそうです。</span>
+</p>
+<hr style="width: 100%; height: 3px;">
+<p style="text-align: center;">
+<a href="../index.html">ホームへ</a>
+<a href="http://bunysmc.exblog.jp/">ブログへ</a>
+</p>
+
+</body>
+</html>

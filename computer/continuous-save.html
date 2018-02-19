@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+<head>
+  <meta content="text/html; charset=Shift_JIS" http-equiv="content-type">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta name="Author" content="tamubun">
+  <link rel="StyleSheet" type="text/css" href="../style.css">
+  <title>continuous-save</title>
+</head>
+
+<body>
+<h1>たむぶん版 Continuous Save</h1>
+<p>
+いっちーさん作の Continuous Save
+(<a href="http://www004.upp.so-net.ne.jp/iccii/files/script/continuous-save.html">オリジナル</a>)
+に私が幾つか変更を加えた物です。画像に含まれる各レイヤーに連続する番号を
+ふり、別々のファイルに保存します。私の変更によって、
+MPlayerに付属のプログラム MEncoderを使っ
+て、保存した<a href="mplayer.html#encode">ファイルから動画を作る</a>こと
+が出来るようになります。たむぶん版 Continuous Saveに関する要望、
+質問等は、<a href="http://bunysmc.exblog.jp/">私のブログ</a>にお願いします。
+</p>
+<p style="font-size: smaller; ">
+(同じ事は、GimpのプラグインGAPをインストールしても出来るようになりますが、この目的のためだけなら、本スクリプトで十分です)
+</p>
+<table summary="Contents"
+style="margin-left: auto; margin-right: auto; width: 80%; text-align: left; border-style: groove; border-width: 3;" border="0" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td width="50%" style="vertical-align: top;">
+  <ul>
+    <li><a href="#usage">使い方</a></li>
+    <li><a href="#mod">オリジナルからの変更点</a></li>
+  </ul>
+</td>
+<td width="50%" style="vertical-align: top;">
+  <ul>
+    <li><a href="#download">ダウンロードとインストール</a></li>
+    <li><a href="#updates">更新履歴</a></li>
+  </ul>
+</td>
+</tr>
+</tbody>
+</table>
+
+<h2><a name="usage">使い方</a></h2>
+<p>
+複数のレイヤーのある画像を右クリックして、
+メニューから <span style="font-weight: bold">Script-Fu</span> →
+<span style="font-weight: bold">Utils</span> →
+<span style="font-weight: bold">Continuous Save</span>
+を選び、ダイアログで下のオプションを指定すると、
+各レイヤーに連番が付けられて、指定した場所に保存されます。
+</p>
+<dl>
+<dt><code>Saved File Type</code></dt>
+<dd>
+保存するファイルの種類(BMP: ビットマップ、JPG: JPEG, PNG: PNG)を指定します。
+</dd>
+<dt><code>Base File Name</code></dt>
+<dd>
+ここで保存するディレクトリと、ファイルのベース名を指定します。
+ベース名に続けて連番が付けられます。<br>
+特例として、ベース名を "#" (シャープ1文字)にしたときだけは、ベース名無し
+として扱い、ファイル名は番号から始まるようになります。Gimp 2.4以降用では、
+ファイル名とディレクトリを別々に指定する必要があります。
+</dd>
+<dt><code>Digits</code></dt>
+<dd>
+番号の桁数です。ここで指定した桁に満たない場合、残りは"0"で埋められます。
+例えば、8桁を指定して、開始番号が1なら、番号は、"00000001", "00000002", ...
+と付けられていきます。
+</dd>
+<dt><code>Start Number</code></dt>
+<dd>
+開始番号を指定します。
+</dd>
+<dt><code>Reverse Order</code></dt>
+<dd>
+ここをチェックした場合、一番上のレイヤーから、一番下のレイヤーに向けて、
+番号が振られて行きます。
+</dd>
+<dt><code>Quality</code></dt>
+<dd>
+ファイルの種類をJPEGか、PNGにした時、ここで指定する値が大きいほど、綺麗な画質
+のファイルが作られます。但し、ファイルサイズは大きくなります。
+</dd>
+</dl>
+<p>
+例えば、"Saved File Type"を"JPG", "Base File Name"を"MyPicture_", Digitsを8と
+し、"Reverse Order"にはチェックを付けていない場合、一番下のレイヤーから、
+一番上のレイヤーに向けて、順に、
+"MyPicture_00000001.jpg", "MyPicture_00000002.jpg", ...と言うファイル名で
+保存されていきます。又、"Base File Name"を"MyDir/#"にしたときは、"MyDir"ディレクトリ
+に、"00000001.jpg", "00000002.jpg", ...と言うファイル名で保存されていきます。
+</p>
+
+<h2><a name="mod">オリジナルからの変更点</a></h2>
+<ul>
+<li>デフォルトでは、一番下のレイヤーから上の
+レイヤーに向けてファイルの番号付けを行って保存するようにした。(オリジナル
+では、上のレイヤーから下のレイヤーに向かう番号付けのみ)</li>
+<li>ファイル番号の付け方を、MPlayer式("00000001", "00000002", ..., "00000010", "00000011", ...)にした。
+(オリジナルでは、"0", "1", ..., "10", "11", ...)</li>
+<li>開始番号を指定できるようにした</li>
+<li>オリジナルの、二つのオプション、"JPEG Compression"(大きい程品質が良い)と、
+"PNG Compression"(小さい程品質が良い)をまとめて、"Quality"(大きい程品質が良い)一つに
+した。
+<li>"Interactive"オプションは無しにしてしまった。(レイヤーが多い時に、
+うっかりチェックしてしまうと困るので)
+</ul>
+
+<h2><a name="download">ダウンロードとインストール</a></h2>
+<p>
+<a href="gimp/continuous-save.scm">continuous-save.scm(Gimp 2.4以降用)</a>を保存して、Gimp 2.8の場合なら、
+</p>
+<ul>
+<li>Unix系のOSの場合は "~/.gimp-2.8/scripts"</li>
+<li>Windowsの場合は "C:\Program Files\GIMP2\scripts"</li>
+</ul>
+<p>
+にコピーして下さい。
+</p>
+
+<h2><a name="updates">更新履歴</a></h2>
+<dl>
+<dt>Ver 0.8-tamubun (2009.5.31)</dt>
+<dd>
+- Gimp 2.4以降用に修正<br>
+</dd>
+<dt>Ver 0.7-tamubun (2007.3.3)</dt>
+<dd>
+- アルファチャンネル付きのレイヤーを保存したときに、ゴミが残る問題を修正<br>
+  (mieki256さんからの指摘)
+</dd>
+<dt>Ver 0.6-tamubun (2005.4.6)</dt>
+<dd>
+- ベースファイル名を"#"にしたときだけ特別に、ベース名無しとして扱うようにした
+</dd>
+<dt>Ver 0.5-tamubun (2005.3.29)</dt>
+<dd>
+- 開始番号を指定できるようにした
+</dd>
+<dt>Ver 0.4-tamubun (2005.3.11)</dt>
+<dd>
+- ファイルの番号の付け方を変更<br>
+- 二つのオプション: "JPEG Compression", "PNG Compression"を、"Quality"にまとめた<br>
+- "Interactive"オプションを無しにした
+</dd>
+<dt>Ver 0.3a (2001.9.26)</dt>
+<dd>
+- いっちーさんオリジナル
+</dd>
+</dl>
+
+<hr style="width: 100%; height: 3px;">
+<p style="text-align: center;">
+<a href="../index.html">ホームへ</a>
+<a href="http://bunysmc.exblog.jp/">ブログへ</a>
+</p>
+
+</body>
+</html>

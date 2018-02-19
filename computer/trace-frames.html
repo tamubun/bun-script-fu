@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+<head>
+  <meta content="text/html; charset=Shift_JIS" http-equiv="content-type">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta name="Author" content="tamubun">
+  <link rel="StyleSheet" type="text/css" href="../style.css">
+  <title>trace-frames</title>
+</head>
+
+<body>
+<h1>Trace Frames</h1>
+<p>
+trace-framesは、<a href="http://www.gimp.org/">Gimp</a>用の拙作スクリプトです。
+<a href="http://www.mplayerhq.hu/">MPlayer</a>を使って作ったファイルを
+Gimpで加工して、動くコメントや図形を追加した動画を作ることができます。
+Gimp-1, Gimp-2どちらでも使えると思います。
+要望、質問などはブログにお願いします。
+尚、ここの説明は、trace-frames Ver 0.2を対象にしています。
+</p>
+<div style="text-align: center;">
+  <img alt="頭と腰" src="trace.gif" width="141" height="111">
+</div>
+<p>
+Gimpの、GAPという動画を扱う為のプラグインでも似たことができるようですが、
+多分、GAPでは、動画に追加した図を直線的にしか動かせないと思います。
+それに、きっとtrace-framesの方が簡単です。
+</p>
+
+<table summary="Contents"
+style="margin-left: auto; margin-right: auto; width: 80%; text-align: left; border-style: groove; border-width: 3;" border="0" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td width="50%" style="vertical-align: top;">
+  <ul>
+    <li><a href="#usage">使い方</a>
+    <ul>
+      <li><a href="#path">パス指定のバリエーション</a></li>
+    </ul>
+    </li>
+  </ul>
+</td>
+<td style="vertical-align: top;">
+  <ul>
+    <li><a href="#download">ダウンロードとインストール</a></li>
+    <li><a href="#todo">あとやりたい事</a></li>
+    <li><a href="#updates">更新履歴</a></li>
+  </ul>
+</td>
+</tr>
+</tbody>
+</table>
+
+<h2><a name="usage">使い方</a></h2>
+<p>
+概要のみです。分かりにくい所は、cut-framesの使い方も参照して下さい。
+</p>
+<ol>
+<li>cut-framesと同様、MPlayerを使って、<a href="cut-frames.html#tile">動画の各フレーム
+をタイルにした画像を用意。</a></li>
+<li>動画中に付け加えたいアイテム(動画中の一部を追って動く図や文字)用に、
+透明のレイヤーを用意し、そのレイヤーに図や文字を書き込む。<br>
+例: 頭の位置を<span style="color:red">○</span>で囲んで追いかけたいなら、
+<span style="color:red">○</span>を付ける最初のフレームの頭の上に
+適当な大きさの透明レイヤーを重ね、そこに<span style="color:red">○</span>を
+書く。
+</li>
+<li>パス作成ツールを選び、cut-framesと同様に、まず最初に
+一つだけ<a href="cut-frames.html#dummy">ダミーのクリック</a>を行う。</li>
+<li>続いて、アイテムが動く軌跡を、cut-framesで切り出した画像
+を<a href="cut-frames.html#layerpath">レイヤーにして重ねる</a>時と同様に、
+ベジエ曲線の端点だけを使って指定していく。ベジエ曲線のコントロールの使い方
+は、<a href="#path">指定の仕方のバリエーション</a>参照。<br>
+例: ダミーのクリックの後、先程の<span style="color:red">○</span>の
+真中をクリックして、最初の位置を指定し、
+それ以降のフレームの頭の位置を順にクリックしていく。</li>
+<li>アイテムを書いたフレームと、その軌跡を指定するパスに同じ名前を付ける。<br>
+例: 頭用の<span style="color:red">○</span>を書いたフレームと、
+パス両方に、"atama"と言う名前を付ける</li>
+<li>アイテムを複数動かしたい時には、それぞれ、2,3,4,5と同じことをする</li>
+<li>画像の右クリックメニューから<span style="font-weight: bold">Script-Fu</span> →
+<span style="font-weight: bold">Gymnp</span> →
+<span style="font-weight: bold">trace-frames</span>
+を選んで実行する。指定できるオプションは以下の通り:
+  <dl>
+  <dt>Frame Width, Frame Height</dt>
+  <dd>フレームの幅と高さ。正しく指定しないと無茶苦茶になる</dd>
+  <dt>Path Smoothing</dt>
+  <dd>パス作成ツールで指定した点の補正をどの程度行うか。0なら補正なし</dd>
+  <dt>Tile to Layer</dt>
+  <dd>新しく作った画像を、タイルのまま残すか、各フレーム毎に切り出して、
+レイヤーにして重ねるか。ここをチェックしている時には、レイヤーにして重ねられるので、
+そのままアニメーションGIFにするか、<a href="continuous-save.html">たむぶん版
+continuous-save</a>を使って、MEncoder用の動画の元を作れる。
+タイルのままにした時には、その後に、cut-framesを使って、切り出す範囲を指定したりする
+ことができる。</dd>
+  </dl>
+</ol>
+<div style="text-align: center;">
+  <img alt="path" src="trace-setsumei.jpg" width="594" height="215"><br>
+  <img alt="result" src="trace-result.jpg" width="593" height="165">
+</div>
+
+<h3><a name="path">パス指定のバリエーション</a></h3>
+<p>以下は組み合わせることができます。
+</p>
+<ul>
+<li>最初のフレームと最後のフレームだけ指定した時には、その間のフレーム全てに
+動かないアイテムが書かれる</li>
+<li>最初のフレームと最後のフレーム以外のフレームで、コントロールを引っ張り出した時には、
+cut-framesと同様に、そのフレームがスムージングのキーフレームになる。(最初のフレームと
+最後のフレームは、常にキーフレーム)</li>
+<li>最初のフレームでコントロールを引っ張りだし、そのコントロールを中間のフレームのどこか
+の上に置くと、最初のフレームから、コントロールで指定したフレームまで、アイテムが次第に浮き出てくる。もう一方のコントロールは無視</li>
+<li>最後のフレームでコントロールを引っ張りだし、そのコントロールを中間のフレームのどこか
+の上に置くと、コントロールで指定したフレームから最後のフレームまで、アイテムが
+次第に薄れて良く。もう一方のコントロールは無視</li>
+</ul>
+
+<h2><a name="download">ダウンロードとインストール</a></h2>
+<p>
+<a href="gimp/trace-frames.scm">trace-frames.scm(Gimp 2.4以降用)</a>をを保存して、Gimp 2.8の場合なら、
+</p>
+<ul>
+<li>Unix系のOSの場合は "~/.gimp-2.8/scripts"</li>
+<li>Windowsの場合は "C:\Program Files\GIMP2\scripts"</li>
+</ul>
+<p>
+にコピーして下さい。
+</p>
+
+<h2><a name="todo">あとやりたい事</a></h2>
+<ul>
+<li>アイテムを回転させられると良いと思う。指定の仕方が問題。コントロールを使いたいけど、キーフレームの指定とごっちゃになる</li>
+<li>端点が画像の外にあるときに、切り出しがおかしくなるバグの修正。当面、気にしない</li>
+</ul>
+
+<h2><a name="updates">更新履歴</a></h2>
+<dl>
+<dt>Ver 0.2 (2009.6.7)</dt>
+<dd>
+- Gimp 2.4以降用に修正
+</dd>
+<dt>Ver 0.11 (2005.4.6)</dt>
+<dd>
+- 薄くなって消えて行く時のバグを修正
+</dd>
+<dt>Ver 0.1 (2005.3.31)</dt>
+<dd>
+- 公開
+</dd>
+</dl>
+
+<hr style="width: 100%; height: 3px;">
+<p style="text-align: center;">
+<a href="../index.html">ホームへ</a>
+<a href="http://bunysmc.exblog.jp/">ブログへ</a>
+</p>
+
+</body>
+</html>
