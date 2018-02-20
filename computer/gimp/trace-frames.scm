@@ -1,5 +1,5 @@
-; trace-frames Version 0.11
-; Copyright (C) 2005 Tamubun <http://bunysmc.exblog.jp/>
+; trace-frames Version 0.3
+; Copyright (C) 2018 Tamubun <http://bunysmc.exblog.jp/>
 ;
 ; This program is free software; you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by
@@ -17,13 +17,13 @@
 
 (define (script-fu-trace-frames inImage inLayer fwidth fheight smooth tile-to-layer)
   (define (floor x) (- x (fmod x 1)))
-  (define (div x y) (floor (/ x y)))
+  (define (div x y) (inexact->exact (floor (/ x y))))
   (define (large? array pos)
-    (let* ((x (aref array (+ 3 pos))) (y (aref array (+ 4 pos))))
-      (not (and (>= 5 (abs (- x (aref array      pos ))))
-		(>= 5 (abs (- y (aref array (+ 1 pos)))))
-		(>= 5 (abs (- x (aref array (+ 6 pos)))))
-		(>= 5 (abs (- y (aref array (+ 7 pos)))))))))
+    (let* ((x (vector-ref array (+ 3 pos))) (y (vector-ref array (+ 4 pos))))
+      (not (and (>= 5 (abs (- x (vector-ref array      pos ))))
+		(>= 5 (abs (- y (vector-ref array (+ 1 pos)))))
+		(>= 5 (abs (- x (vector-ref array (+ 6 pos)))))
+		(>= 5 (abs (- y (vector-ref array (+ 7 pos)))))))))
 
   (define (frame-num x y iwidth iheight)
     (let* ((n-col (div iwidth  fwidth ))
@@ -31,25 +31,26 @@
 	   (row (div y fheight)))
       (if (< y 0)
 	  0
-        (min (+ col (* n-col row))
-	     (- (* (div iwidth fwidth) (div iheight fheight)) 1)))))
+	(inexact->exact
+	 (min (+ col (* n-col row))
+	      (- (* (div iwidth fwidth) (div iheight fheight)) 1))))))
 
   (define (single a pos x y type)
-    (aset a      pos  x)
-    (aset a (+ 1 pos) y)
-    (aset a (+ 2 pos) type))
+    (vector-set! a      pos  x)
+    (vector-set! a (+ 1 pos) y)
+    (vector-set! a (+ 2 pos) type))
 
   (define (simple-path array)
     (let* ((iwidth  (car (gimp-image-width  inImage)))
 	   (iheight (car (gimp-image-height inImage)))
-	   (x0 (aref array  9)) (y0 (aref array 10))
-	   (x1 (aref array 18)) (y1 (aref array 19))
+	   (x0 (vector-ref array  9)) (y0 (vector-ref array 10))
+	   (x1 (vector-ref array 18)) (y1 (vector-ref array 19))
 	   (start (frame-num x0 y0 iwidth iheight))
 	   (end   (frame-num x1 y1 iwidth iheight))
-;	   (x00 (min (aref array 6) (aref array 12)))
-;	   (y00 (min (aref array 7) (aref array 13)))
-;	   (cwidth  (abs (- (aref array 6) (aref array 12))))
-;	   (cheight (abs (- (aref array 7) (aref array 13))))
+;	   (x00 (min (vector-ref array 6) (vector-ref array 12)))
+;	   (y00 (min (vector-ref array 7) (vector-ref array 13)))
+;	   (cwidth  (abs (- (vector-ref array 6) (vector-ref array 12))))
+;	   (cheight (abs (- (vector-ref array 7) (vector-ref array 13))))
 	   (dx (if (< start end) fwidth (- fwidth)))
 	   (path-len (+ 1 (abs (- end start))))
 	   (len (+ 6 (* 9 path-len)))
@@ -58,7 +59,7 @@
 
       (set! idx 6)
       (while (< idx 15)
-        (aset array2 idx (aref array idx))
+        (vector-set! array2 idx (vector-ref array idx))
 	(set! idx (+ 1 idx)))
 
       (set! idx 15)
@@ -84,14 +85,14 @@
 ;	(single array2 (+ 6 idx) (+ x00 cwidth) (+ y00 cheight) 2)
 	(set! idx (+ idx 9)))
 
-      (single array2        6  (aref array  6) (aref array  7) 2)
-      (single array2       12  (aref array 12) (aref array 13) 2)
-      (single array2 (- len 9) (aref array 15) (aref array 16) 2)
-      (single array2 (- len 3) (aref array 21) (aref array 22) 2)
+      (single array2        6  (vector-ref array  6) (vector-ref array  7) 2)
+      (single array2       12  (vector-ref array 12) (vector-ref array 13) 2)
+      (single array2 (- len 9) (vector-ref array 15) (vector-ref array 16) 2)
+      (single array2 (- len 3) (vector-ref array 21) (vector-ref array 22) 2)
       array2)) ; End of simple-path
 
   (define (smooth-path array step)
-    (define (xy-value x-or-y idx d) (fmod (aref array (+ 9 x-or-y (* 9 idx))) d))
+    (define (xy-value x-or-y idx d) (fmod (vector-ref array (+ 9 x-or-y (* 9 idx))) d))
 
     (define (triple a pos idx x-or-y) ; x-or-y: 0 .. x, 1 .. y
       (let* ((d (if (= x-or-y 0) fwidth fheight))
@@ -107,8 +108,8 @@
 	(single a (+ 6 pos) (* 10 (+ idx 2)) (+ y mean) 2))) ; End of triple
 
     (define (get-hints)
-      (let* ((pos (- (length array) 18))
-	     (hints nil))
+      (let* ((pos (- (vector-length array) 18))
+	     (hints '()))
 
 	(while (>= pos 15)
 	  (if (large? array pos)
@@ -117,11 +118,11 @@
 	hints)) ; End of get-hints
 
     (define (get-key-idx hints)
-      (let* ((end (- (div (- (length array) 6) 9) 1))
+      (let* ((end (- (div (- (vector-length array) 6) 9) 1))
 	     (s1 (* 1.5 step))
 	     (h) (i)
-	     (key-idx nil))
-	(set! h (car hints))
+	     (key-idx '()))
+	(set! h (if (null? hints) #f (car hints)))
 	(if (and h (< h s1))
 	    (prog1
 	     (set! i h)
@@ -133,17 +134,17 @@
 	  (if (and h (< h (+ i s1)))
 	      (prog1
 	       (set! i h)
-	       (set! hints (cdr hints))
-	       (set! h (car hints)))
+	       (set! hints (if (null? hints) null (cdr hints)))
+	       (set! h (if (null? hints) #f (car hints))))
 	    (set! i (+ step i))))
-	(reverse key-idx))) ; End of get-key-idx
+	(if (null? key-idx) '() (reverse key-idx)))) ; End of get-key-idx
 
 ;  smoot-path
 ;  -----------------
-    (let* ((len (/ (- (length array) 6) 9))
+    (let* ((len (/ (- (vector-length array) 6) 9))
 	   (end (- len (/ step 2)))
 	   (key-idx (get-key-idx (get-hints)))
-	   (key-idx-cpy (copy-list key-idx))
+	   (key-idx-cpy (map (lambda (x) x) key-idx)) ; copy-list
 	   (seq (cons-array (+ 6 (* 9 (+ 2 (length key-idx)))) 'double))
 	   (img) (layer)
 	   (d)
@@ -164,7 +165,7 @@
 
 	(set! i step)
 	(set! j 0)
-	(while key-idx
+	(while (pair? key-idx)
 	  (triple seq j (car key-idx) x-or-y)
 	  (set! key-idx (cdr key-idx))
 	  (set! j (+ j 1)))
@@ -179,7 +180,8 @@
 	(single seq (+ j 12) (* 10 len 1) 0 2)
 	(single seq (+ j 15) (* 10 len 1) 0 2)
 
-	(gimp-path-set-points img (if (= x-or-y 0) "x" "y") 1 (length seq) seq)
+	(gimp-path-set-points img
+          (if (= x-or-y 0) "x" "y") 1 (vector-length seq) seq)
 	(set! i 0)
 	(while (< i len)
 	  (set! dist (* 10 i))
@@ -189,8 +191,8 @@
 	     (set! dist (+ 1 (max x dist)))
 	     (set! point (gimp-path-get-point-at-dist img dist))
 	     (set! x (car point)))
-	  (set! y (* d (div (aref array (+ 9 x-or-y (* 9 i))) d)))
-	  (aset array (+ 9 x-or-y (* 9 i)) (+ y (cadr point)))
+	  (set! y (* d (div (vector-ref array (+ 9 x-or-y (* 9 i))) d)))
+	  (vector-set! array (+ 9 x-or-y (* 9 i)) (+ y (cadr point)))
 	  (set! i (+ i 1)))
 
 	(set! key-idx key-idx-cpy)
@@ -203,7 +205,7 @@
   (let* ((outImage (car (gimp-image-new 10 10 RGB)))
 	 (outLayer (car (gimp-layer-new outImage 10 10 RGB "Background" 100 NORMAL)))
 	 (layers (cadr (gimp-image-get-layers inImage)))
-	 (n-layers (length layers))
+	 (n-layers (vector-length layers))
 	 (paths (cadr (gimp-path-list inImage)))
 	 (item-layer)
 	 (path)
@@ -216,7 +218,7 @@
     (gimp-image-undo-disable outImage)
     (gimp-image-add-layer outImage outLayer 0)
 
-    (set! l (aref layers (- n-layers 1)))
+    (set! l (vector-ref layers (- n-layers 1)))
     (gimp-image-resize outImage (car (gimp-drawable-width  l))
 				(car (gimp-drawable-height l)) 0 0)
     (gimp-selection-clear inImage)
@@ -225,13 +227,13 @@
     (gimp-floating-sel-to-layer paste)
     (gimp-layer-set-offsets paste 0 0)
 
-    (set! path (car paths))
+    (set! path (if (null? paths) #f (car paths)))
     (while path
-      (set! item-layer nil)
+      (set! item-layer #f)
       (set! i 0)
       (while (< i n-layers)
-	(set! l (aref layers i))
-        (if (= 0 (string-search path (car (gimp-layer-get-name l))))
+	(set! l (vector-ref layers i))
+        (if (string=? path (car (gimp-layer-get-name l)))
 	    (begin
 	      (set! item-layer l)
 	      (set! i n-layers))
@@ -240,7 +242,7 @@
       (if item-layer
 	  (let* ((points (gimp-path-get-points inImage path))
 		 (array (nth 3 points))
-		 (len (length array))
+		 (len (vector-length array))
 		 (path-len (/ (- len 6) 9))
 		 (offsets (gimp-drawable-offsets item-layer))
 		 (base-x) (base-y)
@@ -254,22 +256,25 @@
 
 	    (cond ((= path-len 2)
 		   (set! array (simple-path array))
-		   (set! len (length array))
+		   (set! len (vector-length array))
 		   (set! path-len (/ (- len 6) 9)))
-		  (t
+		  (#t
 		   (smooth-path array (* smooth 3))))
 
-	    (set! base-x (aref array 9))
-	    (set! base-y (aref array 10))
+	    (set! base-x (vector-ref array 9))
+	    (set! base-y (vector-ref array 10))
 
 	    (if (large? array 6)
 		(begin
-		  (set! start (frame-num (aref array 9) (aref array 10)
+		  (set! start (frame-num (vector-ref array 9)
+					 (vector-ref array 10)
 					 iwidth iheight))
 		  (set! goal
-			(max (frame-num (aref array  6) (aref array  7)
+			(max (frame-num (vector-ref array  6)
+					(vector-ref array  7)
 					iwidth iheight)
-			     (frame-num (aref array 12) (aref array 13)
+			     (frame-num (vector-ref array 12)
+					(vector-ref array 13)
 					iwidth iheight)))
 		  (if (> goal start)
 		      (begin
@@ -278,17 +283,22 @@
 
 	    (if (large? array (- len 9))
 		(begin
-		  (set! goal (frame-num (aref array (- len 6)) (aref array (- len 5))
+		  (set! goal (frame-num (vector-ref array (- len 6))
+					(vector-ref array (- len 5))
 					iwidth iheight))
 		  (set! start
-			(min (frame-num (aref array (- len 9)) (aref array (- len 8))
+			(min (frame-num (vector-ref array (- len 9))
+					(vector-ref array (- len 8))
 					iwidth iheight)
-			     (frame-num (aref array (- len 3)) (aref array (- len 2))
+			     (frame-num (vector-ref array (- len 3))
+					(vector-ref array (- len 2))
 					iwidth iheight)))
 		  (if (> goal start)
 		      (begin
-			(set! opacity-step2 (+ 1 (div 100 (+ 1 (- goal start)))))
-			(set! dimm-idx (+ 15 (* 9 (- path-len 1 (- goal start)))))))))
+			(set! opacity-step2
+			      (+ 1 (div 100 (+ 1 (- goal start)))))
+			(set! dimm-idx
+			      (+ 15 (* 9 (- path-len 1 (- goal start)))))))))
 
 	    (gimp-edit-copy item-layer)
 	    (set! copy (car (gimp-edit-paste paste 0)))
@@ -304,21 +314,22 @@
 
 	      (set! copy (car (gimp-edit-paste paste 0)))
 	      (gimp-floating-sel-to-layer copy)
-	      (gimp-layer-set-offsets copy
-				      (+ (car offsets)  (- (aref array      idx ) base-x))
-				      (+ (cadr offsets) (- (aref array (+ 1 idx)) base-y)))
+	      (gimp-layer-set-offsets
+	       copy
+	       (+ (car offsets)  (- (vector-ref array      idx ) base-x))
+	       (+ (cadr offsets) (- (vector-ref array (+ 1 idx)) base-y)))
 	      (gimp-layer-set-opacity copy opacity)
 	      (gimp-image-merge-down outImage copy 0)
 	      (set! idx (+ 9 idx)))
 	    ))
       (set! paths (cdr paths))
-      (set! path (car paths)))
+      (set! path (if (null? paths) #f (car paths))))
 
     (set! outLayer (car (gimp-image-merge-visible-layers outImage 0)))
 
-    (set! y 0)
     (if (= tile-to-layer 1)
 	(begin
+	  (set! y 0)
 	  (while (< y iheight)
 	    (set! x 0)
 	    (while (< x iwidth)

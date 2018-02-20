@@ -1,5 +1,5 @@
-; cut-frames Version 0.4
-; Copyright (C) 2005 Tamubun <http://bunysmc.exblog.jp/>
+; cut-frames Version 0.5
+; Copyright (C) 2018 Tamubun <http://bunysmc.exblog.jp/>
 ;
 ; This program is free software; you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by
@@ -17,13 +17,13 @@
 
 (define (script-fu-cut-frames inImage inLayer fwidth fheight orient smooth)
   (define (floor x) (- x (fmod x 1)))
-  (define (div x y) (floor (/ x y)))
+  (define (div x y) (inexact->exact (floor (/ x y))))
   (define (large? array pos)
-    (let* ((x (aref array (+ 3 pos))) (y (aref array (+ 4 pos))))
-      (not (and (>= 5 (abs (- x (aref array      pos ))))
-		(>= 5 (abs (- y (aref array (+ 1 pos)))))
-		(>= 5 (abs (- x (aref array (+ 6 pos)))))
-		(>= 5 (abs (- y (aref array (+ 7 pos)))))))))
+    (let* ((x (vector-ref array (+ 3 pos))) (y (vector-ref array (+ 4 pos))))
+      (not (and (>= 5 (abs (- x (vector-ref array      pos ))))
+		(>= 5 (abs (- y (vector-ref array (+ 1 pos)))))
+		(>= 5 (abs (- x (vector-ref array (+ 6 pos)))))
+		(>= 5 (abs (- y (vector-ref array (+ 7 pos)))))))))
 
   (define (frame-num x y iwidth iheight)
     (let* ((n-col (div iwidth  fwidth ))
@@ -36,21 +36,21 @@
 	      (- (* (div iwidth fwidth) (div iheight fheight)) 1))))))
 
   (define (single a pos x y type)
-    (aset a      pos  x)
-    (aset a (+ 1 pos) y)
-    (aset a (+ 2 pos) type))
+    (vector-set! a      pos  x)
+    (vector-set! a (+ 1 pos) y)
+    (vector-set! a (+ 2 pos) type))
 
   (define (simple-path array)
     (let* ((iwidth  (car (gimp-image-width  inImage)))
 	   (iheight (car (gimp-image-height inImage)))
-	   (x0 (aref array  9)) (y0 (aref array 10))
-	   (x1 (aref array 18)) (y1 (aref array 19))
+	   (x0 (vector-ref array  9)) (y0 (vector-ref array 10))
+	   (x1 (vector-ref array 18)) (y1 (vector-ref array 19))
 	   (start (frame-num x0 y0 iwidth iheight))
 	   (end   (frame-num x1 y1 iwidth iheight))
-	   (x00 (min (aref array 6) (aref array 12)))
-	   (y00 (min (aref array 7) (aref array 13)))
-	   (cwidth  (abs (- (aref array 6) (aref array 12))))
-	   (cheight (abs (- (aref array 7) (aref array 13))))
+	   (x00 (min (vector-ref array 6) (vector-ref array 12)))
+	   (y00 (min (vector-ref array 7) (vector-ref array 13)))
+	   (cwidth  (abs (- (vector-ref array 6) (vector-ref array 12))))
+	   (cheight (abs (- (vector-ref array 7) (vector-ref array 13))))
 	   (dx (if (< start end) fwidth (- fwidth)))
 	   (path-len (+ 1 (abs (- end start))))
 	   (len (+ 6 (* 9 path-len)))
@@ -59,7 +59,7 @@
 
       (set! idx 6)
       (while (< idx 15)
-        (aset array2 idx (aref array idx))
+        (vector-set! array2 idx (vector-ref array idx))
 	(set! idx (+ 1 idx)))
 
       (set! idx 15)
@@ -86,7 +86,7 @@
       array2)) ; End of simple-path
 
   (define (smooth-path array step)
-    (define (xy-value x-or-y idx d) (fmod (aref array (+ 9 x-or-y (* 9 idx))) d))
+    (define (xy-value x-or-y idx d) (fmod (vector-ref array (+ 9 x-or-y (* 9 idx))) d))
 
     (define (triple a pos idx x-or-y) ; x-or-y: 0 .. x, 1 .. y
       (let* ((d (if (= x-or-y 0) fwidth fheight))
@@ -103,7 +103,7 @@
 
     (define (get-hints)
       (let* ((pos (- (vector-length array) 18))
-	     (hints nil))
+	     (hints '()))
 
 	(while (>= pos 15)
 	  (if (large? array pos)
@@ -115,8 +115,8 @@
       (let* ((end (- (div (- (vector-length array) 6) 9) 1))
 	     (s1 (* 1.5 step))
 	     (h) (i)
-	     (key-idx nil))
-	(set! h (car hints))
+	     (key-idx '()))
+	(set! h (if (null? hints) #f (car hints)))
 	(if (and h (< h s1))
 	    (prog1
 	     (set! i h)
@@ -128,18 +128,18 @@
 	  (if (and h (< h (+ i s1)))
 	      (prog1
 	       (set! i h)
-	       (set! hints (cdr hints))
-	       (set! h (car hints)))
+	       (set! hints (if (null? hints) null (cdr hints)))
+	       (set! h (if (null? hints) #f (car hints))))
 	    (set! i (+ step i))))
-	(reverse key-idx))) ; End of get-key-idx
+	(if (null? key-idx) '() (reverse key-idx)))) ; End of get-key-idx
 
 ;  smoot-path
 ;  -----------------
     (let* ((len (/ (- (vector-length array) 6) 9))
 	   (end (- len (/ step 2)))
 	   (key-idx (get-key-idx (get-hints)))
-	   (key-idx-cpy (copy-list key-idx))
-	   (seq (cons-array (+ 6 (* 9 (+ 2 (vector-length key-idx)))) 'double))
+	   (key-idx-cpy (map (lambda (x) x) key-idx)) ; copy-list
+	   (seq (cons-array (+ 6 (* 9 (+ 2 (length key-idx)))) 'double))
 	   (img) (layer)
 	   (d)
 	   (i) (j) (x) (y) (dist) (point) (x-or-y))
@@ -159,7 +159,7 @@
 
 	(set! i step)
 	(set! j 0)
-	(while key-idx
+	(while (pair? key-idx)
 	  (triple seq j (car key-idx) x-or-y)
 	  (set! key-idx (cdr key-idx))
 	  (set! j (+ j 1)))
@@ -185,8 +185,8 @@
 	     (set! dist (+ 1 (max x dist)))
 	     (set! point (gimp-path-get-point-at-dist img dist))
 	     (set! x (car point)))
-	  (set! y (* d (div (aref array (+ 9 x-or-y (* 9 i))) d)))
-	  (aset array (+ 9 x-or-y (* 9 i)) (+ y (cadr point)))
+	  (set! y (* d (div (vector-ref array (+ 9 x-or-y (* 9 i))) d)))
+	  (vector-set! array (+ 9 x-or-y (* 9 i)) (+ y (cadr point)))
 	  (set! i (+ i 1)))
 
 	(set! key-idx key-idx-cpy)
@@ -219,7 +219,7 @@
     (if (not (large? array 6))
 	(begin
 	  (set! full-frame #t)
-	  (set! x  (aref array 9))            (set! y  (aref array 10))
+	  (set! x  (vector-ref array 9))            (set! y  (vector-ref array 10))
 	  (set! x1 (* fwidth (div x fwidth))) (set! y1 (* fheight (div y fheight)))
 	  (set! x  (+ x1 (/ fwidth 2)))       (set! y  (+ y1 (/ fheight 2)))
 	  (set! x2 (+ x1 fwidth))             (set! y2 (+ y1 fheight))
@@ -237,12 +237,12 @@
 
     (set! i 6)
     (while (< i len)
-      (set! x1 (aref array i))
-      (set! y1 (aref array (+ i 1)))
-      (set! x (aref array (+ i 3)))
-      (set! y (aref array (+ i 4)))
-      (set! x2 (aref array (+ i 6)))
-      (set! y2 (aref array (+ i 7)))
+      (set! x1 (vector-ref array i))
+      (set! y1 (vector-ref array (+ i 1)))
+      (set! x (vector-ref array (+ i 3)))
+      (set! y (vector-ref array (+ i 4)))
+      (set! x2 (vector-ref array (+ i 6)))
+      (set! y2 (vector-ref array (+ i 7)))
       (if full-frame
 	  (begin
 	    (set! x1 (* fwidth (div x fwidth))) (set! y1 (* fheight (div y fheight)))
@@ -312,7 +312,7 @@
 	    ((= orient 2)
 	     (gimp-layer-set-offsets paste x2 y2))
 
-	    (#t nil))
+	    (#t '()))
 
       (set! i (+ i 9)))
 
