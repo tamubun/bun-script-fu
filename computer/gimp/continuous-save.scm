@@ -44,6 +44,9 @@
 ; version 0.8-tamubun
 ;              2009/05/31 tamubun <http://bunysmc.exblog.jp/>
 ;     - Modified for Gimp 2.4
+; version 0.9-tamubun
+;              2018/02/23 tamubun <http://bunysmc.exblog.jp/>
+;     - Added "Layer to Image Size" option.
 ;
 ; --------------------------------------------------------------------
 ;
@@ -72,6 +75,7 @@
 		digits			; trailing 0's
 		start                   ; start number
 		reverse			; If true, order from top to bottom
+		resize-to-image         ; If true, resize all layers to image
 		quality			; compression quality for JPG, PNG
 		)
 
@@ -104,10 +108,11 @@
 	 (image-type (car (gimp-image-base-type img)))
 	 (len (string-length file-name))
 	 (png-comp (- 9 (div quality 12)))
-
+	 (img-width (car (gimp-image-width img)))
+	 (img-height (car (gimp-image-height img)))
 	) ; end variable definition
 
-        (if (and (> len 0)
+      (if (and (> len 0)
 		 (not (eqv? #\/ (string-ref file-name (- len 1))))
 		 (equal? (car (last (strbreakup file-name "/"))) "#"))
 	    (set! file-name (substring file-name 0 (- len 1))))
@@ -122,13 +127,13 @@
 	               0)		;; convert to RGB because JPEG can't treat INDEXED and GRAY image
 	             (image-type)))	;; otherwise, equal to origianl image type
 	         (layer (vector-ref (cadr layers) (if (= reverse 1) count (- number 1 count))))
-(print 2)
-	         (tmp-img (car (gimp-image-new (car (gimp-drawable-width  layer))
-	                                       (car (gimp-drawable-height layer))
-	                                       tmp-image-type)))
+		 (layer-width  (car (gimp-drawable-width  layer)))
+		 (layer-height (car (gimp-drawable-height layer)))
+		 (tmp-img-width  (if (= 1 resize-to-image) img-width layer-width))
+		 (tmp-img-height (if (= 1 resize-to-image) img-height layer-height))
+	         (tmp-img (car (gimp-image-new tmp-img-width tmp-img-height tmp-image-type)))
 	         (tmp-layer (car (gimp-layer-new tmp-img
-	                                         (car (gimp-drawable-width  layer))
-	                                         (car (gimp-drawable-height layer))
+	                                         layer-width layer-height
 	                                         (+ 1 (* 2 tmp-image-type)) "Temp Layer" 100 NORMAL)))
 	        )
 
@@ -143,7 +148,11 @@
 	        (gimp-floating-sel-anchor (car (gimp-edit-paste tmp-layer 0)))
 	        (gimp-image-remove-layer-mask tmp-img tmp-layer APPLY)
 	        (gimp-displays-flush)))
-	    ;(set! tmp-display (car (gimp-display-new tmp-img)))
+	    (if (= 1 resize-to-image)
+		(let* ((offsets (gimp-drawable-offsets layer)))
+		  (gimp-layer-set-offsets tmp-layer (car offsets) (cadr offsets))
+		  (gimp-layer-resize-to-image-size tmp-layer)))
+	    ;(gimp-display-new tmp-img)
 	    ;(gimp-displays-flush)
 
 	;; save a resulting image by specified image type
@@ -179,5 +188,6 @@
 	SF-ADJUSTMENT	"Digits"		'(8 1 10 1 5 0 1)
 	SF-ADJUSTMENT	"Start Number"		'(1 1 9999999 10 5 0 1)
 	SF-TOGGLE	"Reverse Order"		FALSE
+	SF-TOGGLE       "Layer to Image Size"   TRUE
 	SF-ADJUSTMENT	"Quality"	        '(75 0 100 1 5 0 0)
 )
