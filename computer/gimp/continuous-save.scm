@@ -47,6 +47,9 @@
 ; version 0.9-tamubun
 ;              2018/02/23 tamubun <http://bunysmc.exblog.jp/>
 ;     - Added "Layer to Image Size" option.
+; version 1.0-tamubun
+;              2019/07/14 tamubun <http://bunysmc.exblog.jp/>
+;     - Modifed for Gimp 2.10
 ;
 ; --------------------------------------------------------------------
 ;
@@ -132,9 +135,10 @@
 		 (tmp-img-width  (if (= 1 resize-to-image) img-width layer-width))
 		 (tmp-img-height (if (= 1 resize-to-image) img-height layer-height))
 	         (tmp-img (car (gimp-image-new tmp-img-width tmp-img-height tmp-image-type)))
+		 ; NORMAL = LAYER-MODE-NORMAL-LEGACY = 0
 	         (tmp-layer (car (gimp-layer-new tmp-img
 	                                         layer-width layer-height
-	                                         (+ 1 (* 2 tmp-image-type)) "Temp Layer" 100 NORMAL)))
+	                                         (+ 1 (* 2 tmp-image-type)) "Temp Layer" 100 0)))
 	        )
 
 	;; create an image with single layer, and remove the layer mask (if exists)
@@ -146,7 +150,8 @@
 	      (let* ((tmp-mask (car (gimp-layer-create-mask tmp-layer 0))))
 	        (gimp-edit-copy (car (gimp-layer-mask layer)))
 	        (gimp-floating-sel-anchor (car (gimp-edit-paste tmp-layer 0)))
-	        (gimp-image-remove-layer-mask tmp-img tmp-layer APPLY)
+		; APPLY = MASK-APPLY = 0
+	        (gimp-image-remove-layer-mask tmp-img tmp-layer 0)
 	        (gimp-displays-flush)))
 	    (if (= 1 resize-to-image)
 		(let* ((offsets (gimp-drawable-offsets layer)))

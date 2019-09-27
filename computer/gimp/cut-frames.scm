@@ -1,4 +1,4 @@
-; cut-frames Version 0.5
+; cut-frames Version 0.6
 ; Copyright (C) 2018 Tamubun <http://bunysmc.exblog.jp/>
 ;
 ; This program is free software; you can redistribute it and/or modify
@@ -197,7 +197,8 @@
 ;  script-fu-cut-frames
 ;  -----------------
   (let* ((outImage (car (gimp-image-new 10 10 RGB)))
-	 (layer (car (gimp-layer-new outImage 10 10 RGB "Background" 100 NORMAL)))
+	 ; NORMAL = LAYER-MODE-NORMAL-LEGACY = 0
+	 (layer (car (gimp-layer-new outImage 10 10 RGB "Background" 100 0)))
 	 (path (car (gimp-path-get-current inImage)))
 	 (points (gimp-path-get-points inImage path))
 	 (array (nth 3 points))
