@@ -50,6 +50,9 @@
 ; version 1.0-tamubun
 ;              2019/07/14 tamubun <http://bunysmc.exblog.jp/>
 ;     - Modifed for Gimp 2.10
+; version 1.1-tamubun
+;              2020/01/23 tamubun <http://bunysmc.exblog.jp/>
+;     - Debugged: Indexed source image is now treated correctly.
 ;
 ; --------------------------------------------------------------------
 ;
@@ -114,7 +117,6 @@
 	 (img-width (car (gimp-image-width img)))
 	 (img-height (car (gimp-image-height img)))
 	) ; end variable definition
-
       (if (and (> len 0)
 		 (not (eqv? #\/ (string-ref file-name (- len 1))))
 		 (equal? (car (last (strbreakup file-name "/"))) "#"))
@@ -122,13 +124,8 @@
 
 	(while (< count number)
 	  (let* (
-	         (tmp-image-type
-	           (cond
-	             ((and (eqv? save-type 0) (eqv? image-type 2))
-	               0)		;; convert to RGB because BMP can't treat INDEXED image
-	             ((and (eqv? save-type 1) (or (eqv? image-type 1) (eqv? image-type 2)))
-	               0)		;; convert to RGB because JPEG can't treat INDEXED and GRAY image
-	             (image-type)))	;; otherwise, equal to origianl image type
+		 ;; tmp image type should be RGB because INDEXED or GRAY image makes trouble
+	         (tmp-image-type 0)
 	         (layer (vector-ref (cadr layers) (if (= reverse 1) count (- number 1 count))))
 		 (layer-width  (car (gimp-drawable-width  layer)))
 		 (layer-height (car (gimp-drawable-height layer)))
